@@ -34,8 +34,8 @@ class MyParser {
     }
 }
 ```
-- Суффиксы и префиксы "My", "Custom", “A”, “B” и подобные им не несут смысловой нагрузки, как и перечисления через “1”, “2”, “one”, “two”.
-- Трудночитаемые и труднопроизносимые названия, такие как “yyyymmddhhmmss”, усложняют чтение и написание кода.
+- Суффиксы и префиксы "My", "Custom", "A", "B" и подобные им не несут смысловой нагрузки, как и перечисления через "1", "2", "one", "two".
+- Трудночитаемые и труднопроизносимые названия, такие как "yyyymmddhhmmss", усложняют чтение и написание кода.
 - Если название функции не отражает ее назначение, то без просмотра исходника невозможно понять, что она делает. То же самое относится к классам и переменным.
 
 #### Хорошо
@@ -180,32 +180,32 @@ function potentialEnergy(mass, height) {
 }
 ```
 
-### Заводите переменные для промежуточных вычислений
+### Заводите переменные или функции для промежуточных вычислений
 
 #### Плохо
 
 ```ruby
-def parse_page(page_title)
-  self.save_product_info(
-    page_title.split('@')[1],
-    page_title.split('@')[0].split('-')[0].strip
+def parse_product_from_page(page_title)
+  return self.build_product(
+    page_title.split('@')[0].split('-')[0].strip,
+    page_title.split('@')[1]
   )
 end
 ```
 
-- Трудно понять смысл вычислений без просмотра аргументов функции `saveProductInfo`.
+- Трудно понять смысл вычислений без просмотра аргументов функции.
 - Часть одинакового исходного кода выполняется несколько раз.
 
 #### Хорошо
 
 ```ruby
-def parse_page(page_title)
+def parse_product_from_page(page_title)
   title_parts = page_title.split('@')
 
   product_title = title_parts[0].split('-')[0].strip
   shop_name = title_parts[1]
 
-  self.save_product_info(product_title, shop_name)
+  self.build_product(product_title, shop_name)
 end
 ```
 
@@ -259,6 +259,7 @@ end
 
 ```java
 public class ProfileScreen {
+\
     public static void open(String firstName,
                             String lastName,
                             Gender gender,
@@ -271,6 +272,7 @@ public class ProfileScreen {
 }
 
 public class HomeScreen {
+
     public void onProfileButtonClicked() {
         String firstName = firstNameView.getText();
         String lastName = lastNameView.getText();
@@ -292,12 +294,14 @@ public class HomeScreen {
 
 ```java
 public class ProfileScreen {
+
     public static void open(PersonalInfo personalInfo, Address address) {
         // Open new screen using SDK
     }
 }
 
 public class HomeScreen {
+
     public void onScreenButtonClicked() {
         String firstName = firstNameView.getText();
         String lastName = lastNameView.getText();
@@ -315,6 +319,7 @@ public class HomeScreen {
 
 ```java
 public class ImageUtils {
+
     public static File ensureCompatibility(
         File imageFile,
         String userAgent,
@@ -338,12 +343,12 @@ public void main() {
 ```
 
 - При вызове функции трудно определить, за что отвечают похожие по типу не именованные аргументы.
-- Если от значения аргументов зависит ветвление алгоритма, то при большом количестве аргументов становится трудно тестировать функцию.
 
 #### Хорошо
 
 ```java
 public class ImageCompatibilityService {
+
     private boolean useCache = true;
     private boolean debugOutput = false;
     private boolean removeTempFiles = true;
@@ -508,7 +513,7 @@ public String findNameOnPage(Page page) {
 }
 ```
 
-### Избегайте побочных действий
+### Избегайте модификации объектов, переданных в функции или классы
 
 #### Плохо
 
@@ -748,7 +753,7 @@ product.price = 3
 val cart = Cart()
 cart.id = 1
 cart.status = CartStatus.CHECKOUT.value
-cart.setPrice = 10
+cart.price = 10
 ```
 
 ### Создавайте data-классы для группировки полей по контексту
@@ -844,31 +849,32 @@ carCreator.create(car) // I see only necessary functions
 #### Плохо
 
 ```java
-public class Service {
-    private int id;
-    private String name;
-}
-
 public class Category {
+
     private int id;
     private String name;
     private List<SubCategory> subCategories;
 }
 
 public class SubCategory {
+
     private int id;
     private String name;
     private List<SubSubCategory> subSubCategories;
 }
 
 public class SubSubCategory {
+
     private int id;
     private String name;
     private List<Service> services;
 }
 
-Category category = getCategory();
-category.getSubCategories().getSubSubCategories().getServices();
+public class Service {
+
+    private int id;
+    private String name;
+}
 ```
 
 - Трудно придумать хорошие отличимые названия для вложенных друг в друга классов.
@@ -878,20 +884,19 @@ category.getSubCategories().getSubSubCategories().getServices();
 #### Хорошо
 
 ```java
-public class Service {
-    private int id;
-    private String name;
-}
-
 public class Category {
+
     private int id;
     private String name;
     private List<Services> services;
     private List<Category> categories;
 }
 
-Category category = getRootCategory();
-category.getCategories().getCategories().getServices();
+public class Service {
+
+    private int id;
+    private String name;
+}
 ```
 
 ### Перед наследованием подумайте, может лучше композиция
@@ -972,6 +977,7 @@ class CartSummaryCell : Cell {
 
 ```java
 public class SettingsProvider {
+
     public void getSettings(SettingsCallback callback) {
         // Get settings from cache
         Settings cachedSettings = getCachedSettings();
@@ -1004,10 +1010,8 @@ public class SettingsProvider {
 }
 ```
 
-- Комментарии к исполняемому коду дублируют сам код и, соответственно, не несут смысловой нагрузки.
+- Комментарии, повторяющие исходный код, не несут смысловой нагрузки и не дают информации о причине действий.
 - Комментарии к каждой строке делают код разрозненным, из-за чего его сложнее читать.
-- В исполняемом коде есть неявности. Не понятно, по какой причине производятся некоторые действия.
-- Чтобы понять, за что отвечает класс, нужно изучить его наполнение.
 
 #### Хорошо
 
@@ -1018,10 +1022,7 @@ public class SettingsProvider {
  * from the source of data (API, Firebase, Cache, etc.)
  */
 public class SettingsProvider {
-    /**
-    * Provides the current settings.
-    * @param callback - A callback to get a result.
-    */
+
     public void getSettings(SettingsCallback callback) {
         // At the request of the customer needs to
         // use the existing settings
@@ -1050,12 +1051,13 @@ public class SettingsProvider {
 }
 ```
 
-### Код должен читаться сверху вниз
+### Код должен читаться сверху вниз, как журнальная статья
 
 #### Плохо
 
 ```java
 public class QueueProcessor {
+
     private static final int WAIT_TIMEOUT = 1;
 
     private Job currentJob;
@@ -1105,6 +1107,7 @@ public class QueueProcessor {
 
 ```java
 public class QueueProcessor {
+
     private static final int WAIT_TIMEOUT = 1;
 
     private Job currentJob;
@@ -1152,7 +1155,7 @@ public class QueueProcessor {
 
 - Если код дублируется, то при изменении алгоритма придется менять код в нескольких местах.
 - Есть разные способы избавиться от дублирования кода. У каждого из них есть свои плюсы и минусы.
-- Похожий код не всегда означает дублирование кода (What???).
+- Похожий код не всегда означает дублирование кода.
 
 #### Дублирование в одном классе
 
@@ -1254,7 +1257,7 @@ class ProfileScreen : BaseUserScreen {
 
 class UsersListScreen : BaseUserScreen {
   fun showUser(user: User, userView: UserView) {
-    val personalInfo = user.getPersonalInfo();
+    val personalInfo = user.personalInfo
 
     userView.firstName.text = getFirstName(personalInfo)
     userView.lastName.text = getLastName(personalInfo)
@@ -1348,7 +1351,7 @@ class PersonalInfo {
 #### Тоже хорошо, если нельзя нарушать ответственность
 
 ```kotlin
-class PersonalInfoNamesDecorator(val persinalInfo: PersonalInfo) {
+class PersonalInfoLogic(val persinalInfo: PersonalInfo) {
 
   fun getFirstName(): String {
     return this.fullNameParts()[0]
@@ -1365,10 +1368,10 @@ class PersonalInfoNamesDecorator(val persinalInfo: PersonalInfo) {
 
 
 val personalInfo = getPersonalInfo()
-val namesDecorator = PersonalInfoNamesDecorator(personalInfo)
+val personalInfoLogic = PersonalInfoLogic(personalInfo)
 
-namesDecorator.getFirstName()
-namesDecorator.getLastName()
+personalInfoLogic.getFirstName()
+personalInfoLogic.getLastName()
 ```
 
 - Избавляйтесь от дублирующегося кода.
@@ -1394,6 +1397,7 @@ class Brand(val id: Integer, val name: String) {}
 - Используйте единый стиль именования для одинаковых вещей.
 - Не делайте много преждевременной оптимизации.
 - Удаляйте неиспользуемый и закомментированный код.
+- Вместо покрытия кода комментариями пытайтесь отраизить свои намерения в коде с помощью продуманного именования, введения промежуточных переменных и функций.
 - Придерживайтесь стиля написания кода вашего языка/фреймворка.
 - Используйте части речи по назначению
   - Используйте глаголы как основу для названий функций.

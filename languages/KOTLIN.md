@@ -16,45 +16,43 @@
 
 #### Плохо
 
-```swift
+```kotlin
 class MyParser {
-    func parseA(yyyymmddhhmmss: String) -> Date {
-        return f("yyyy-MM-dd'T'HH:mm:ssZ").date(from: yyyymmddhhmmss)!
+
+    fun parseA(yyyymmddhhmmss: String): Date {
+        return parse(yyyymmddhhmmss, "yyyy-MM-dd'T'HH:mm:ssZ")
     }
 
-    func parseB(yyyymmdd: String) -> Date {
-        return f("yyyy-MM-dd").date(from: yyyymmdd)!
+    private fun parse(ds: String, f: String): Date {
+        val ff = getF(f)
+        return LocalDate.parse(ds, ff)
     }
 
-    func f(ff: String) -> DateFormatter {
-        let df = DateFormatter()
-        df.locale = Locale(identifier: "en_US_POSIX")
-        df.dateFormat = ff
-        return df
+    private fun getF(f: String): DateTimeFormatter {
+        return DateTimeFormatter.ofPattern(f)
     }
 }
 ```
-- Суффиксы и префиксы "My", "Custom", “A”, “B” и подобные им не несут смысловой нагрузки, как и перечисления через “1”, “2”, “one”, “two”.
-- Трудночитаемые и труднопроизносимые названия, такие как “yyyymmddhhmmss”, усложняют чтение и написание кода.
+- Суффиксы и префиксы "My", "Custom", "A", "B" и подобные им не несут смысловой нагрузки, как и перечисления через "1", "2", "one", "two".
+- Трудночитаемые и труднопроизносимые названия, такие как "yyyymmddhhmmss", усложняют чтение и написание кода.
 - Если название функции не отражает ее назначение, то без просмотра исходника невозможно понять, что она делает. То же самое относится к классам и переменным.
 
 #### Хорошо
 
-```swift
-class DateParser {
-    func parseIsoDateTime(isoDateTime: String) -> Date {
-        return dateFormatter("yyyy-MM-dd'T'HH:mm:ssZ").date(from: isoDateTime)!
+```kotlin
+class DateTimeParser {
+
+    fun parseIsoDateTime(isoDateTime: String): Date {
+        return parseDateTime(isoDateTime, "yyyy-MM-dd'T'HH:mm:ssZ")
     }
 
-    func parseIsoDate(isoDate: String) -> Date {
-        return dateFormatter("yyyy-MM-dd").date(from: isoDate)!
+    private fun parseDateTime(dateTime: String, format: String): Date {
+        val formatter = getDateTimeFormatter(format)
+        return LocalDate.parse(dateTime, formatter)
     }
 
-    func dateFormatter(dateFormat: String) -> DateFormatter {
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-        dateFormatter.dateFormat = dateFormat
-        return dateFormatter
+    private fun getDateTimeFormatter(format: String): DateTimeFormatter {
+        return DateTimeFormatter.ofPattern(ff)
     }
 }
 ```
@@ -63,19 +61,27 @@ class DateParser {
 
 #### Плохо
 
-```javascript
-let c = await findCars();
+```kotlin
+fun showTxt(txt: String) {
+    this.vb.tv.text = txt
 
-for (let i = 0; i < c.length; i++) {
-  let cc = c[i];
-  let o = await findOrders(cc);
+    // Стоп... что значит "vb"? Visual Basic? Volleyball? Или View Binding?
+    // И что такое "tv"? Television? Tommy Vercetti? Или Text View?
+    // И почему свойство "text" и похожая переменная "txt" отличаются по именам?
+}
+```
 
-  for (let j = 0; o.length; j++) {
-    let oo = o[j];
-    // Do some stuff with car and order.
-    // Stop... what is a `c`?
-    // ...and, what is a `oo`?
-  }
+```kotlin
+val c: List<Car> = findCars()
+
+c.forEach {
+    val o: List<Order> = findOrders(it)
+
+    o.forEach {
+        // Стоп... А как мне обратиться к автомобилю?
+        // И что вообще сейчас означает "it"?
+        // А что такое "c", я уже забыл...
+    }
 }
 ```
 
@@ -86,17 +92,21 @@ for (let i = 0; i < c.length; i++) {
 
 #### Хорошо
 
-```javascript
-let cars = await findCars();
+```kotlin
+fun showText(text: String) {
+    this.viewBinding.textView.text = text
+}
+```
 
-for (let carIndex = 0; carIndex < cars.length; carIndex++) {
-  let car = cars[carIndex];
-  let orders = await findOrders(car);
+```kotlin
+val cars: List<Car> = findCars()
 
-  for (let orderIndex = 0; orderIndex < orders.length; orderIndex++) {
-    let order = orders[orderIndex];
-    // Do some stuff with car and order.
-  }
+cars.forEach { car ->
+    val orders: List<Order> = findOrders(car)
+
+    orders.forEach { order ->
+        // Можно взаимодействовать с "car" и "order"
+    }
 }
 ```
 
@@ -137,20 +147,30 @@ fun showContractName(contract: Contract) {
 
 #### Плохо
 
-```javascript
-function showItemsInPager(items, onPageChangeListener) {
-  this.pager.setItems(items);
+```kotlin
+object Calculator {
 
-  setTimeout(
-    () => { this.pager.setOnPageChangeListener(onPageChangeListener) },
-    300
-  );
+    fun calculatePotentialEnergy(mass: Float, height: Float): Float {
+        return mass * height * 9.81f;
+    }
 }
 ```
 
-```javascript
-function potentialEnergy(mass, height) {
-  return mass * height * 9.81;
+```kotlin
+class Storage {
+
+    fun getUser(): User? {
+        val userJSON = this.sharedPreferences.getString("USER", null) ?: return null
+        return parseUserFromJSON(userJSON)
+    }
+
+    fun setUser(user: User?) {
+        val userJSON = if (user == null) null else convertUserToJSON(user)
+        this.sharedPreferences
+            .edit()
+            .putString("USER", userJSON)
+            .apply()
+    }
 }
 ```
 
@@ -159,64 +179,74 @@ function potentialEnergy(mass, height) {
 
 #### Хорошо
 
-```javascript
-const PAGER_LISTENER_DELAY_TO_PREVENT_INITIAL_TRIGGERING = 300;
+```kotlin
+const val GRAVITATION_CONSTANT: Float = 9.81f
 
-function showItemsInPager(items, onPageChangeListener) {
-  this.pager.setItems(items);
+object Calculator {
 
-  setTimeout(
-    () => { this.pager.setOnPageChangeListener(onPageChangeListener) },
-    PAGER_LISTENER_DELAY_TO_PREVENT_INITIAL_TRIGGERING
-  );
+    fun calculatePotentialEnergy(mass: Float, height: Float): Float {
+        return mass * height * GRAVITATION_CONSTANT;
+    }
 }
 ```
 
-```javascript
-const gravitationConstant = 9.81;
+```kotlin
+const val USER_KEY: String = "USER"
 
-function potentialEnergy(mass, height) {
-  return mass * height * gravitationConstant;
+class Storage {
+
+    fun getUser(): User? {
+        val userJSON = this.sharedPreferences.getString(USER_KEY, null) ?: return null
+        return parseUserFromJSON(userJSON)
+    }
+
+    fun setUser(user: User?) {
+        val userJSON = if (user == null) null else convertUserToJSON(user)
+        this.sharedPreferences
+            .edit()
+            .putString(USER_KEY, userJSON)
+            .apply()
+    }
 }
 ```
 
-### Заводите переменные для промежуточных вычислений
+### Заводите переменные или функции для промежуточных вычислений
 
 #### Плохо
 
-```ruby
-def parse_page(page_title)
-  self.save_product_info(
-    page_title.split('@')[1],
-    page_title.split('@')[0].split('-')[0].strip
-  )
-end
+```kotlin
+fun parseProductFromPage(pageTitle: String): Product {
+    return buildProduct(
+        pageTitle.split("@")[0].split("-")[0].trim(),
+        pageTitle.split("@")[1]
+    )
+}
 ```
 
-- Трудно понять смысл вычислений без просмотра аргументов функции `saveProductInfo`.
+- Трудно понять смысл вычислений без просмотра аргументов функции.
 - Часть одинакового исходного кода выполняется несколько раз.
 
 #### Хорошо
 
-```ruby
-def parse_page(page_title)
-  title_parts = page_title.split('@')
+```kotlin
+fun parseProductFromPage(pageTitle: String): Product {
+    val titleParts = pageTitle.split("@")
 
-  product_title = title_parts[0].split('-')[0].strip
-  shop_name = title_parts[1]
+    val productTitle = titleParts[0].split("-")[0].trim()
+    val shopName = titleParts[1]
 
-  self.save_product_info(product_title, shop_name)
-end
+    return buildProduct(productTitle, shopName)
+}
 ```
 
 #### Плохо
 
-```ruby
-def save_film(film)
-  if self.user.roles.admin.any? || film.creator_id == self.user.id
-    self.repository.save(film)
-  end
-end
+```kotlin
+fun saveFilm(film: Film)
+    if (this.user.roles.any { role -> role.isAdmin() } || film.creatorId == this.user.id) {
+        this.repository.save(film)
+    }
+}
 ```
 
 - Трудно понять смысл проверки без детального изучения каждого условия.
@@ -224,31 +254,31 @@ end
 
 #### Хорошо
 
-```ruby
-def save_film(film)
-  is_admin = self.user.roles.admin.any?
-  is_creator = film.creator_id == self.user.id
+```kotlin
+fun saveFilm(film: Film)
+    val isAdmin = this.user.roles.any { role -> role.isAdmin() }
+    val isCreator = film.creatorId == this.user.id
 
-  if is_admin || is_creator
-    self.repository.save(film)
-  end
-end
+    if (isAdmin || isCreator) {
+        this.repository.save(film)
+    }
+}
 ```
 
-```ruby
-def save_film(film)
-  if self.is_admin || self.is_creator(film)
-    self.repository.save(film)
-  end
-end
+```kotlin
+fun saveFilm(film: Film)
+    if (isAdmin() || isCreator(film)) {
+        this.repository.save(film)
+    }
+}
 
-def is_admin
-  self.user.roles.admin.any?
-end
+fun isAdmin(): Boolean {
+    return this.user.roles.any { role -> role.isAdmin() }
+}
 
-def is_creator(film)
-  film.creator_id == self.user.id
-end
+fun isCreator(film: Film): Boolean {
+    return film.creatorId == this.user.id
+}
 ```
 
 ## Функции
@@ -257,29 +287,36 @@ end
 
 #### Плохо
 
-```java
-public class ProfileScreen {
-    public static void open(String firstName,
-                            String lastName,
-                            Gender gender,
-                            Country country,
-                            String city,
-                            String street,
-                            String house) {
-        // Open new screen using SDK
+```kotlin
+class HomeScreen {
+
+    fun onProfileButtonClicked() {
+        val firstName = this.firstNameView.text
+        val lastName = this.lastNameView.text
+        // Получение остальных значений с отображения
+
+        ProfileScreen.open(
+            firstName, lastName, gender,
+            country, city, street, house
+        )
     }
 }
 
-public class HomeScreen {
-    public void onProfileButtonClicked() {
-        String firstName = firstNameView.getText();
-        String lastName = lastNameView.getText();
-        // Get other values from views
+class ProfileScreen {
 
-        ProfileScreen.open(
-          firstName, lastName, gender,
-          country, city, street, house
-        );
+    companion object {
+
+        fun open(
+            firstName: String,
+            lastName: String,
+            gender: Gender,
+            country: Country,
+            city: String,
+            street: String,
+            house: String
+        ) {
+            // Открыть экран с помощью SDK
+        }
     }
 }
 ```
@@ -290,130 +327,107 @@ public class HomeScreen {
 
 #### Хорошо
 
-```java
-public class ProfileScreen {
-    public static void open(PersonalInfo personalInfo, Address address) {
-        // Open new screen using SDK
+```kotlin
+class HomeScreen {
+
+    fun onScreenButtonClicked() {
+        val firstName = this.firstNameView.text
+        val lastName = this.lastNameView.text
+        // Получение остальных значений с отображения
+
+        val personalInfo = PersonalInfo(firstName, lastName, gender)
+        val address = Address(country, city, street, house)
+
+        ProfileScreen.open(personalInfo, address)
     }
 }
 
-public class HomeScreen {
-    public void onScreenButtonClicked() {
-        String firstName = firstNameView.getText();
-        String lastName = lastNameView.getText();
-        // Get other values from views
+class ProfileScreen {
 
-        PersonalInfo personalInfo = new PersonalInfo(firstName, lastName, gender);
-        Address address = new Address(country, city, street, house);
+    companion object {
 
-        ProfileScreen.open(personalInfo, address);
+        fun open(personalInfo: PersonalInfo, address: Address) {
+            // Открыть экран с помощью SDK
+        }
     }
 }
 ```
 
 #### Плохо
 
-```java
-public class ImageUtils {
-    public static File ensureCompatibility(
-        File imageFile,
-        String userAgent,
-        boolean useCache,
-        boolean debugOutput,
-        boolean removeTempFiles) {
-
-        // Image conversion logic
-    }
-}
-
-public void main() {
-    ImageUtils.ensureCompatibility(
-        new File("../storage/image.webp"),
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36",
+```kotlin
+fun main() {
+    ImageUtils.convertToSupportedFormat(
+        File("../storage/image.webp"),
         false,
         true,
         true
-    );
+    )
+}
+
+object ImageUtils {
+
+    fun convertToSupportedFormat(
+        imageFile: File,
+        useCache: Boolean,
+        debugOutput: Boolean,
+        removeTempFiles: Boolean
+    ): File {
+        // Преобразование изображения
+    }
 }
 ```
 
 - При вызове функции трудно определить, за что отвечают похожие по типу не именованные аргументы.
-- Если от значения аргументов зависит ветвление алгоритма, то при большом количестве аргументов становится трудно тестировать функцию.
 
 #### Хорошо
 
-```java
-public class ImageCompatibilityService {
-    private boolean useCache = true;
-    private boolean debugOutput = false;
-    private boolean removeTempFiles = true;
+```kotlin
+fun main() {
+    ImageUtils.convertToSupportedFormat(
+        imageFile = File("../storage/image.webp"),
+        useCache = false,
+        debugOutput = true,
+        removeTempFiles = true
+    )
+}
 
-    // Setters
+object ImageUtils {
 
-    public File convert(File imageFile, String userAgent) {
-        // Image conversion logic
+    fun convertToSupportedFormat(
+        imageFile: File,
+        useCache: Boolean,
+        debugOutput: Boolean,
+        removeTempFiles: Boolean
+    ): File {
+        // Преобразование изображения
     }
 }
-
-public void main() {
-    ImageCompatibilityService converter = new ImageCompatibilityService()
-        .setUseCache(false)
-        .setDebugOutput(true)
-        .setRemoveTempFiles(true)
-
-    converter.convert(
-        new File("../storage/image.webp"),
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36",
-    );
-}
-```
-
-#### Решение через именованные аргументы
-
-```ruby
-class ImageUtils
-  def self.ensure_compatibility(image_file:,
-                                user_agent:,
-                                use_cache: true,
-                                debug_output: false,
-                                remove_temp_files: true)
-    # Image conversion logic
-  end
-end
-
-# Somewhere in the code
-ImageUtils.ensure_compatibility(
-  image_file: File.new('../storage/image.webp'),
-  user_agent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36',
-  use_cache: false,
-  debug_output: true,
-  remove_temp_files: true
-);
 ```
 
 ### Разбивайте комплексный код на простые функции
 
 #### Плохо
 
-```swift
-func coloriseOrderStatus(order: Order) {
-    var colorHex: String? = nil
+```kotlin
+fun coloriseOrderStatus(order: Order) {
+    var colorHex: String? = null
 
-    if order.creationDate != nil {
+    if (order.creationDate != null) {
         colorHex = "#ff0000"
-    } else if order.processingStartDate != nil {
+    } else if (order.processingStartDate != null) {
         colorHex = "#00ff00"
-    } else if order.deliveryStartDate != nil {
+    } else if (order.deliveryStartDate != null) {
         colorHex = "#0000ff"
     } else {
         colorHex = "#000000"
     }
 
-    statusView.backgroundColor = getUIColorByHex(colorHex)
+    this.statusView.backgroundColor = getColorByHex(colorHex)
 }
 
-func getUIColorByHex(hex: String) -> UIColor {
-    // Create UIColor by hex
+fun getColorByHex(hex: String): Int {
+    // Создать цвет по hex-коду
 }
 ```
 
@@ -421,42 +435,38 @@ func getUIColorByHex(hex: String) -> UIColor {
 
 #### Хорошо
 
-```swift
-func coloriseOrderStatus(order: Order) {
-    let status = getOrderStatus(order)
-    let colorHex = getOrderColorHexByStatus(status)
-    let color = getUIColorByHex(color)
+```kotlin
+fun coloriseOrderStatus(order: Order) {
+    val status = getOrderStatus(order)
+    val colorHex = getOrderColorHexByStatus(status)
+    val color = getColorByHex(color)
 
-    textView.backgroudColor = color
+    this.statusView.backgroudColor = color
 }
 
-func getOrderStatus(order: Order) -> OrderStatus {
-    if order.creationDate != nil {
-        return .created
-    } else if order.processingStartDate != nil {
-        return .processing
-    } else if order.deliveryStartDate != nil {
-        return .delivery
+fun getOrderStatus(order: Order): OrderStatus {
+    return if (order.creationDate != null) {
+        OrderStatus.CREATED
+    } else if (order.processingStartDate != null) {
+        OrderStatus.PROCESSING
+    } else if (order.deliveryStartDate != null) {
+        OrderStatus.DELIVERY
     } else {
-        return .unknown
+        OrderStatus.UNKNOWN
     }
 }
 
-func getOrderColorHexByStatus(status: OrderStatus) -> String {
-    switch status {
-    case .created:
-        return "#ff0000"
-    case .processing:
-        return "#00ff00"
-    case .delivery:
-        return "0000ff"
-    case .unknown:
-        return "#000000"
+fun getOrderColorHexByStatus(status: OrderStatus): String {
+    return when (status) {
+        OrderStatus.CREATED -> "#ff0000"
+        OrderStatus.PROCESSING -> "#00ff00"
+        OrderStatus.DELIVERY -> "0000ff"
+        OrderStatus.UNKNOWN -> "#000000"
     }
 }
 
-func getUIColorByHex(hex: String) -> UIColor {
-    // Create UIColor by hex
+fun getColorByHex(hex: String): Int {
+    // Создать цвет по hex-коду
 }
 ```
 
@@ -464,20 +474,27 @@ func getUIColorByHex(hex: String) -> UIColor {
 
 #### Плохо
 
-```java
-public Product parseProductFromPage(Page page) {
-    String name = null;
-    Element titleElement = page.findElementByTag("title");
+```kotlin
+class UserViewHolder {
 
-    if (titleElement != null) {
-        String title = titleElement.getText();
-        name = title.split("-")[0].trim();
+    fun showUser(user: User) {
+        val formattedUserRoles = user
+            .roles
+            .map { role -> role.name }
+            .joinToString(", ")
+
+        this.nameTextView.text = formatUserName(user)
+        this.createdAtTextView.text = formatUserCreatedAt(user)
+        this.rolesTextView = formattedUserRoles
     }
 
-    String description = findDescriptionOnPage(page);
-    Integer rating = findRatingOnPage(page);
+    private fun formatUserName(user: User): String {
+        // Форматирование имени пользователя
+    }
 
-    return new Product(name, description, rating);
+    private fun formatUserCreatedAt(user: User): String {
+        // Форматирование даты создания пользователя
+    }
 }
 ```
 
@@ -485,129 +502,153 @@ public Product parseProductFromPage(Page page) {
 
 #### Хорошо
 
-```java
-public Product parseProductFromPage(Page page) {
-    String name = findNameOnPage(page);
-    String description = findDescriptionOnPage(page);
-    Integer rating = findRatingOnPage(page);
+```kotlin
+class UserViewHolder {
 
-    return new Product(name, description, rating);
-}
-
-public String findNameOnPage(Page page) {
-    Element titleElement = page.findElementByTag("title");
-
-    if (titleElement == null) {
-        return null;
+    fun showUser(user: User) {
+        this.nameTextView.text = formatUserName(user)
+        this.createdAtTextView.text = formatUserCreatedAt(user)
+        this.rolesTextView = formatUserRoles(user)
     }
 
-    String title = titleElement.getText();
-    String name = title.split("-")[0].trim();
+    private fun formatUserName(user: User): String {
+        // Форматирование имени пользователя
+    }
 
-    return name;
+    private fun formatUserCreatedAt(user: User): String {
+        // Форматирование даты создания пользователя
+    }
+
+    private fun formatUserRoles(user: User): String {
+        return user
+            .roles
+            .map { role -> role.name }
+            .joinToString(", ")
+    }
 }
 ```
 
-### Избегайте побочных действий
+### Избегайте модификации объектов, пришедших в классы и функции извне
 
 #### Плохо
 
-```ruby
-class Table
-  attr_accessor :items
+```kotlin
+fun main() {
+    val items = mutableListOf(
+        Item(id = 1),
+        Item(id = 2),
+        Item(id = 3)
+    )
 
-  def add_items(items)
-    if self.items.nil?
-      self.items = items
-    else
-      self.items.push(*items)
-    end
-  end
-end
+    val adapter = ItemsAdapter()
+    adapter.setItems(items)
 
+    // Упс... Item появился и в Adapter-е
+    items.add(
+        Item(id = 4)
+    )
+}
 
-items = [1, 2, 3]
-table = Table.new
-table.add_items(items)
+class Item(val id: Int)
 
-# Somewhere in the other code
-items.push(4, 5, 6) # Oops, items added to the table.
+class ItemsAdapter {
+
+    private lateinit var items: MutableList<Item>
+
+    fun setItems(items: MutableList<Item>) {
+        this.items = items
+    }
+}
 ```
 
 - Так как ссылка на один и тот же объект захвачена разными контекстами, то модификация объекта неявным образом влияет на работу каждого контекста.
 
 #### Хорошо
 
-```ruby
-class Table
-  attr_accessor :items
+```kotlin
+fun main() {
+    val items = mutableListOf(
+        Item(id = 1),
+        Item(id = 2),
+        Item(id = 3)
+    )
 
-  def add_items(items)
-    if self.items.nil?
-      self.items = []
-    end
+    val adapter = ItemsAdapter()
+    adapter.setItems(items)
 
-    self.items.push(*items)
-  end
-end
+    // Всё хорошо, items в Adapter-е не изменились
+    items.add(
+        Item(id = 4)
+    )
+}
 
+class Item(val id: Int)
 
-items = [1, 2, 3]
-table = Table.new
-table.add_items(items)
+class ItemsAdapter {
 
-# Somewhere in the other code
-items.push(4, 5, 6) # This is OK
+    private val items: MutableList<Item> = mutableListOf()
+
+    fun setItems(items: List<Item>) {
+        this.items.clear()
+        this.items.addAll(items)
+    }
+}
 ```
 
 ### Указывайте на скрытые условия в названии функции
 
 #### Плохо
 
-```swift
-func runTask(task: Task) {
-  if !task.isRunning() {
-    task.run()
-  }
+```kotlin
+fun main() {
+    val task = Task()
+
+    runTask(task) // Ожидаем, что задача запустилась
+    runTask(task) // Ожидаем повторного запуска, но его не произошло
 }
 
-// Working with already running task
-let task = getTask()
-runTask(task) // Why the task didn't run if i called the method????
+fun runTask(task: Task) {
+    if (!task.isRunning()) {
+        task.run()
+    }
+}
 ```
 
 - Невозможно понять весь алгоритм, если не посмотреть реализацию всех функций.
 
 #### Хорошо
 
-```swift
-func runTaskIfNotRunning(task: Task) {
-  if !task.isRunning() {
-    task.run()
-  }
+```kotlin
+fun main() {
+    val task = Task()
+
+    runTaskIfNotRunning(task) // Ожидаем, что задача запустилась
+    runTaskIfNotRunning(task) // Не ожидаем повторного запуска, всё ок
 }
 
-// I know that task will not be runned if already runned.
-let task = getTask()
-runTaskIfNotRunning(task);
+fun runTaskIfNotRunning(task: Task) {
+    if (!task.isRunning()) {
+        task.run()
+    }
+}
 ```
 
 ### Заменяйте вложенные условные операторы граничным оператором
 
 #### Плохо
 
-```java
-public Integer getTotalAmount() {
+```kotlin
+fun getTotalAmount(): Int? {
     if (isArchived()) {
-        return null;
+        return null
     } else {
         if (this.cachedTotalAmount != null) {
-            return this.cachedTotalAmount;
+            return this.cachedTotalAmount
         } else {
             if (isEnoughData()) {
-                return this.calculateTotalAmount();
+                return this.calculateTotalAmount()
             } else {
-                return this.getDefaultTotalAmount();
+                return this.getDefaultTotalAmount()
             }
         }
     }
@@ -619,21 +660,21 @@ public Integer getTotalAmount() {
 
 #### Хорошо
 
-```java
-public Integer getTotalAmount() {
+```kotlin
+fun getTotalAmount(): Int? {
     if (isArchived()) {
-        return null;
+        return null
     }
 
     if (this.cachedTotalAmount != null) {
-        return this.cachedTotalAmount;
+        return this.cachedTotalAmount
     }
 
     if (!this.isEnoughData()) {
-        return this.getDefaultTotalAmount();
+        return this.getDefaultTotalAmount()
     }
 
-    return this.calculateTotalAmount();
+    return this.calculateTotalAmount()
 }
 ```
 
@@ -641,27 +682,26 @@ public Integer getTotalAmount() {
 
 #### Плохо
 
-```javascript
-class ProjectPage {
-  loadProject() {
-    this.projectUseCase
-      .getById(this.projectId)
-      .then((project) => {
-        this.showProject(project);
-        this.showMessage('Loaded', true);
-      })
-      .catch(() => {
-        this.showMessage('Loading error', false);
-      });
-  }
+```kotlin
+class ProjectScreen {
 
-  showMessage(messageText, isError) {
-    if (isError) {
-      // Show error message, for example via SnackBar
-    } else {
-      // Show success message, for example via Toast
+    suspend fun loadProject() {
+        try {
+            val project = this.projectUseCase.getById(this.projectId)
+            this.showProject(project)
+            this.showMessage("Loaded", true)
+        } catch (e: Exception) {
+            this.showMessage("Loading error", false)
+        }
     }
-  }
+
+    fun showMessage(messageText: String, isError: Boolean) {
+        if (isError) {
+            // Показ соообщения об ошибке в специальном дизайне для ошибок
+        } else {
+            // Показ информационного сообщения
+        }
+    }
 }
 ```
 
@@ -669,27 +709,26 @@ class ProjectPage {
 
 #### Хорошо
 
-```javascript
-class ProjectPage {
-  loadProject() {
-    this.projectUseCase
-      .getById(this.projectId)
-      .then((project) => {
-        this.showProject(project);
-        this.showSuccessMessage('Loaded');
-      })
-      .catch(() => {
-        this.showErrorMessage('Loading error');
-      });
-  }
+```kotlin
+class ProjectScreen {
 
-  showSuccessMessage(messageText) {
-    // Show success message, for example via Toast
-  }
+    suspend fun loadProject() {
+        try {
+            val project = this.projectUseCase.getById(this.projectId)
+            this.showProject(project)
+            this.showSuccessMessage("Loaded")
+        } catch (e: Exception) {
+            this.showErrorMessage("Loading error")
+        }
+    }
 
-  showErrorMessage(messageText) {
-    // Show error message, for example via SnackBar
-  }
+    fun showSuccessMessage(messageText: String) {
+        // Показ сообщения об успехе в специальном дизайне для успеха
+    }
+
+    fun showErrorMessage(messageText: String) {
+        // Показ соообщения об ошибке в специальном дизайне для ошибок
+    }
 }
 ```
 
@@ -700,24 +739,28 @@ class ProjectPage {
 #### Плохо
 
 ```kotlin
+fun main() {
+    val product = Info(
+        id = 1,
+        name = "Spoon",
+        description = "Material - Silver",
+        price = 3
+    )
+
+    val cart = Info(
+        id = 1,
+        status = CartStatus.CHECKOUT.value,
+        price = 10
+    )
+}
+
 class Info(
-  var id: Integer? = null,
-  var name: String? = null,
-  var status: String? = null,
-  var description: String? = null,
-  var price: Integer? = null
+    var id: Integer? = null,
+    var name: String? = null,
+    var status: String? = null,
+    var description: String? = null,
+    var price: Integer? = null
 )
-
-val product = Info()
-product.id = 1
-product.name = "Spoon"
-product.description = "Material - Silver"
-product.price = 3
-
-val cart = Info()
-cart.id = 1
-cart.status = CartStatus.CHECKOUT.value
-cart.price = 10
 ```
 
 - С течением времени God Object бесконечно разрастается.
@@ -726,45 +769,55 @@ cart.price = 10
 #### Хорошо
 
 ```kotlin
+fun main() {
+    val product = Product(
+        id = 1,
+        name = "Spoon",
+        description = "Material - Silver",
+        price = 3
+    )
+
+    val cart = Cart(
+        id = 1,
+        status = CartStatus.CHECKOUT.value,
+        price = 10
+    )
+}
+
 class Product(
-  var id: Integer? = null,
-  var name: String? = null,
-  var description: String = null,
-  val price: Integer? = null
+    var id: Integer? = null,
+    var name: String? = null,
+    var description: String = null,
+    val price: Integer? = null
 )
 
 class Cart(
-  var id: Integer? = null,
-  var status: String? = null,
-  var price: String? = null
+    var id: Integer? = null,
+    var status: String? = null,
+    var price: String? = null
 )
-
-val product = Product()
-product.id = 1
-product.name = "Spoon"
-product.description = "Material - Silver"
-product.price = 3
-
-val cart = Cart()
-cart.id = 1
-cart.status = CartStatus.CHECKOUT.value
-cart.setPrice = 10
 ```
 
 ### Создавайте data-классы для группировки полей по контексту
 
 #### Плохо
 
-```ruby
-class City
-  attr_accessor :city_id, :city_name, :region_id, :region_name
-end
+```kotlin
+fun main() {
+    val city = City(
+        cityId = 1,
+        cityName = "Novosibirsk",
+        regionId = 1,
+        regionName = "Novosibirsk region"
+    )
+}
 
-city = City.new
-city.city_id = 1
-city.city_name = "Novosibirsk"
-city.region_id = 1
-city.region_name = "Novosibirsk region"
+class City(
+    val cityId: Int? = null,
+    val cityName: String? = null,
+    val regionId: Int? = null,
+    val regionName: String? = null
+)
 ```
 
 - Невозможно независимо переиспользовать некоторые поля.
@@ -772,103 +825,111 @@ city.region_name = "Novosibirsk region"
 
 #### Хорошо
 
-```ruby
-class City
-  attr_accessor :id, :name, :region
-end
+```kotlin
+fun main() {
+    val city = City(
+        id = 1,
+        name = "Novosibirsk",
+        region = Region(
+            id = 1,
+            name = "Novosibirsk region"
+        )
+    )
+}
 
-class Region
-  attr_accessor :id, :name
-end
+class City(
+    val id: Int? = null,
+    val name: String? = null,
+    val region: Region? = null
+)
 
-region = Region.nnew
-region.id = 1
-region.name = "Novosibirsk region"
-
-city = City.new
-city.id = 1
-city.name = "Novosibirsk"
-city.region = region
+class Region(
+    val id: Int? = null,
+    val name: String? = null
+)
 ```
 
 ### Скрывайте методы, которые не будут использоваться снаружи
 
 #### Плохо
 
-```swift
-public class CarCreator {
-    private apiService = ApiService()
+```kotlin
+fun main() {
+    val car = Car()
+    val carCreator = CarCreator()
+    carCreator.generateCarJson(car) // Почему эта функция доступна?
+}
 
-    public func create(car: Car) -> Car {
-        let json = generateCarJson(car)
-        let createdCar = apiService.createCar(car)
+class CarCreator {
+
+    private val apiService = ApiService()
+
+    fun create(car: Car): Car {
+        val json = generateCarJson(car)
+        val createdCar = this.apiService.createCar(car)
         return createdCar
     }
 
-    public func generateCarJson(car: Car) -> String {
-        // Some logic of json generation
+    fun generateCarJson(car: Car): String {
+        // Логика по созданию JSON-а
     }
 }
-
-let car = Car()
-let carCreator = CarCreator()
-carCreator.generateCarJson(car) // Why do I need this function?
 ```
 
 - Среда разработки при автодополнении показывает методы, которые не нужны программисту, который использует класс.
 
 #### Хорошо
 
-```swift
-public class CarCreator {
-    private apiService = ApiService()
+```kotlin
+fun main() {
+    val car = Car()
+    val carCreator = CarCreator()
+    carCreator.create(car) // Видны только необходимые функции
+}
 
-    public func create(car: Car) -> Car {
-        let json = generateCarJson(car)
-        let createdCar = apiService.createCar(car)
+class CarCreator {
+
+    private val apiService = ApiService()
+
+    fun create(car: Car): Car {
+        val json = generateCarJson(car)
+        val createdCar = this.apiService.createCar(car)
         return createdCar
     }
 
-    private func generateCarJson(car: Car) -> String {
-        // Some logic of json generation
+    private fun generateCarJson(car: Car): String {
+        // Логика по созданию JSON-а
     }
 }
-
-let car = Car()
-let carCreator = CarCreator()
-carCreator.create(car) // I see only necessary functions
 ```
 
 ### Используйте рекурсию для описания глубокой вложенности
 
 #### Плохо
 
-```java
-public class Service {
-    private int id;
-    private String name;
-}
+```kotlin
+class Category(
+    val id: Int,
+    val name: String,
+    val subCategories: List<SubCategory>
+)
 
-public class Category {
-    private int id;
-    private String name;
-    private List<SubCategory> subCategories;
-}
+class SubCategory(
+    val id: Int,
+    val name: String,
+    val subSubCategories: List<SubSubCategory>
+)
 
-public class SubCategory {
-    private int id;
-    private String name;
-    private List<SubSubCategory> subSubCategories;
-}
+class SubSubCategory(
+    val id: Int,
+    val name: String,
+    val services: List<Service>
+)
 
-public class SubSubCategory {
-    private int id;
-    private String name;
-    private List<Service> services;
-}
-
-Category category = getCategory();
-category.getSubCategories().getSubSubCategories().getServices();
+class Service(
+    val id: Int,
+    val name: String
+)
 ```
 
 - Трудно придумать хорошие отличимые названия для вложенных друг в друга классов.
@@ -877,21 +938,18 @@ category.getSubCategories().getSubSubCategories().getServices();
 
 #### Хорошо
 
-```java
-public class Service {
-    private int id;
-    private String name;
-}
+```kotlin
+class Category(
+    val id: Int,
+    val name: String,
+    val services: List<Service>,
+    val categories: List<Category>
+)
 
-public class Category {
-    private int id;
-    private String name;
-    private List<Services> services;
-    private List<Category> categories;
-}
-
-Category category = getRootCategory();
-category.getCategories().getCategories().getServices();
+class Service(
+    val id: Int,
+    val name: String
+)
 ```
 
 ### Перед наследованием подумайте, может лучше композиция
@@ -899,30 +957,41 @@ category.getCategories().getCategories().getServices();
 #### Плохо
 
 ```kotlin
-class ProductScreen : Screen {
-  fun showProduct(product: Product) {
-    this.price.text = this.formatMoney(product.price)
-  }
+class ProductFragment : BaseFragment {
+
+    private var productPriceTextView: TextView? = null
+
+    fun showProduct(product: Product) {
+        productPriceTextView?.text = formatMoney(product.price)
+    }
 }
 
-class ServiceScreen : Screen {
-  fun showService(service: Service) {
-    this.price.text = this.formatMoney(service.price)
-  }
+class ServiceFragment : BaseFragment {
+
+    private var servicePriceTextView: TextView? = null
+
+    fun showService(service: Service) {
+        servicePriceTextView?.text = formatMoney(service.price)
+    }
 }
 
-open class Screen : SomeSdkClass {
-  protected fun formatMoney(money: Money): String {
-    // Some formatting logic
-    return "1.234.567,89 $"
-  }
+open class BaseFragment : Fragment {
+
+    protected fun formatMoney(money: Money): String {
+        // Некая логика форматирования цены
+        return "1.234.567,89 $"
+    }
 }
 
-class CartSummaryCell : Cell {
-  fun showSummary(cart: Cart) {
-    // Whait! I don't have a formatMoney method here...
-    this.amount.text = ""
-  }
+class CartSummaryViewHolder : RecyclerView.ViewHolder {
+
+    private var priceTextView: TextView? = null
+
+    fun showSummary(cart: Cart) {
+        // Стоп... а как отформатировать цену,
+        // если форматирование находится во фрагменте?
+        priceTextView?.text = ""
+    }
 }
 ```
 
@@ -932,37 +1001,43 @@ class CartSummaryCell : Cell {
 
 ```kotlin
 class MoneyFormatter {
-  fun format(Money money): String {
-    // Some formatting logic
-    return "1.234.567,89 $"
-  }
+
+    fun format(Money money): String {
+        // Некая логика форматирования цены
+        return "1.234.567,89 $"
+    }
 }
 
-class ProductScreen : Screen {
-  fun showProduct(product: Product) {
-    this.price.text = MoneyFormatter().format(product.price)
-  }
+class ProductFragment : Fragment {
+
+    private var productPriceTextView: TextView? = null
+    private val moneyFormatter = MoneyFormatter()
+
+    fun showProduct(product: Product) {
+        productPriceTextView?.text = moneyFormatter.format(product.price)
+    }
 }
 
-class ServiceScreen : Screen {
-  fun showService(service: Service) {
-    this.price.text = MoneyFormatter().format(service.price)
-  }
+class ServiceFragment : Fragment {
+
+    private var servicePriceTextView: TextView? = null
+    private val moneyFormatter = MoneyFormatter()
+
+    fun showService(service: Service) {
+        servicePriceTextView?.text = moneyFormatter.format(service.price)
+    }
 }
 
-class CartSummaryCell : Cell {
-  fun showSummary(cart: Cart) {
-    this.amount.text = MoneyFormatter().format(cart.totalAmount)
-  }
+class CartSummaryViewHolder : RecyclerView.ViewHolder {
+
+    private var priceTextView: TextView? = null
+    private val moneyFormatter = MoneyFormatter()
+
+    fun showSummary(cart: Cart) {
+        priceTextView?.text = moneyFormatter.format(cart.totalAmount)
+    }
 }
 ```
-
-### Пользуйтесь геттерами и сеттерами
-
-Используя геттеры и сеттеры вы получаете полный контроль при управлении объектом:
-- Можно настраивать дополнительную логику при считывании значения, например, ленивая инициализация.
-- Можно настраивать дополнительную логику при задании значения, например, сброс значения другого поля.
-- Можно управлять областью видимости полей, чтобы было удобнее работать с объектом извне.
 
 ## Общее
 
@@ -970,130 +1045,126 @@ class CartSummaryCell : Cell {
 
 #### Плохо
 
-```java
-public class SettingsProvider {
-    public void getSettings(SettingsCallback callback) {
-        // Get settings from cache
-        Settings cachedSettings = getCachedSettings();
+```kotlin
+class SettingsProvider {
 
-        // Needs to return cached if already exists.
-        boolean returnCached = cachedSettings != null;
+    fun getSettings(onSuccess: (settings: Settings) -> Unit) {
+        // Достать настройки из кеша
+        val cachedSettings: Settings = getCachedSettings()
 
-        // Needs to return remote only if cached does not exists.
-        boolean returnRemote = cachedSettings == null;
+        // Сразу вернуть закешированные настройки, если они есть
+        val returnCached = cachedSettings != null
 
-        // Return cached settings if needs
+        // Возвращать скачанные с сервера настройки только если кеш пустой
+        val returnRemote = cachedSettings == null
+
+        // Вернуть кеш, если нужно
         if (returnCached) {
-            callback.onSuccess(cachedSettings);
+            onSuccess.invoke(cachedSettings)
         }
 
-        // Always load actual settings from server
-        loadSettingsFromServer(new SettingsCallback() {
-            @Override
-            public void onSuccess(Settings settings) {
-                // Cache loaded settings
-                cacheSettings(settings);
+        // Всегда скачиваем актуальные настройки с сервера
+        loadSettingsFromServer(
+            onSuccess = { settings: Settings ->
+                cacheSettings(settings)
 
-                // Return loaded settings if needs
                 if (returnRemote) {
-                    callback.onSuccess(settings);
+                    onSuccess.invoke(settings)
                 }
             }
-        });
+        )
     }
 }
 ```
 
-- Комментарии к исполняемому коду дублируют сам код и, соответственно, не несут смысловой нагрузки.
+- Комментарии, повторяющие исходный код, не несут смысловой нагрузки и не дают информации о причине действий.
 - Комментарии к каждой строке делают код разрозненным, из-за чего его сложнее читать.
-- В исполняемом коде есть неявности. Не понятно, по какой причине производятся некоторые действия.
-- Чтобы понять, за что отвечает класс, нужно изучить его наполнение.
 
 #### Хорошо
 
-```java
+```kotlin
 /**
- * Provides the access to the application settings.
- * Can be used in the other code in order to abstract
- * from the source of data (API, Firebase, Cache, etc.)
+ * Предоставляет доступ к настройкам приложения.
+ * Может использоваться в коде с целью абстрагироваться
+ * от источника данных (API, Firebase, кеш и т.д.)
  */
-public class SettingsProvider {
-    /**
-    * Provides the current settings.
-    * @param callback - A callback to get a result.
-    */
-    public void getSettings(SettingsCallback callback) {
-        // At the request of the customer needs to
-        // use the existing settings
-        // if they have been downloaded at least once
-        // but refresh the actual ones every time.
-        Settings cachedSettings = getCachedSettings();
+class SettingsProvider {
 
-        boolean returnCached = cachedSettings != null;
-        boolean returnRemote = cachedSettings == null;
+    fun getSettings(onSuccess: (settings: Settings) -> Unit) {
+        // По просьбе заказчика нужно использовать настройки
+        // из кеша, если они там есть, но актуализировать кеш
+        // в любом случае.
+        val cachedSettings: Settings = getCachedSettings()
+
+        val returnCached = cachedSettings != null
+        val returnRemote = cachedSettings == null
 
         if (returnCached) {
-            callback.onSuccess(cachedSettings);
+            onSuccess.invoke(cachedSettings)
         }
 
-        loadSettingsFromServer(new SettingsCallback() {
-            @Override
-            public void onSuccess(Settings settings) {
-                cacheSettings(settings);
+        loadSettingsFromServer(
+            onSuccess = { settings: Settings ->
+                cacheSettings(settings)
 
                 if (returnRemote) {
-                    callback.onSuccess(settings);
+                    onSuccess.invoke(settings)
                 }
             }
-        });
+        )
     }
 }
 ```
 
-### Код должен читаться сверху вниз
+### Код должен читаться сверху вниз, как журнальная статья
 
 #### Плохо
 
-```java
-public class QueueProcessor {
-    private static final int WAIT_TIMEOUT = 1;
+```kotlin
+class QueueProcessor {
 
-    private Job currentJob;
+    companion object {
+        const val WAIT_TIMEOUT: Int = 1
+    }
 
-    private void runNextJob() {
-        Job job = getNextJob();
+    var currentJob: Job? = null
+
+    private suspend fun runNextJob() {
+        val job: Job? = getNextJob()
 
         if (job != null) {
-            runJob(job);
+            runJob(job)
         }
     }
 
-    private void wait() {
-        TimeUnit.SECONDS.sleep(WAIT_TIMEOUT);
+    private suspend fun wait() {
+        delay(WAIT_TIMEOUT)
     }
 
-    private void clearCurrentJob() {
-        this.currentJob = null;
+    private fun clearCurrentJob() {
+        this.currentJob = null
     }
 
-    private void setCurrentJob(Job job) {
-        this.currentJob = job;
+    private fun setCurrentJob(job: Job) {
+        this.currentJob = job
     }
 
-    public void run() {
-        while (true) {
-            runNextJob();
-            wait();
+    public fun run() {
+        CoroutineScope(Dispatchers.Default).launch {
+            while (isActive) {
+                runNextJob()
+                wait()
+            }
         }
     }
 
-    private void runJob(Job job) {
-        setCurrentJob(job);
-        job.run();
-        clearCurrentJob();
+    private suspend fun runJob(job: Job) {
+        setCurrentJob(job)
+        job.run()
+        clearCurrentJob()
     }
 
-    private Job getNextJob() {
+    private fun getNextJob(): Job? {
         // Some logic to fetch the next job.
     }
 }
@@ -1103,47 +1174,52 @@ public class QueueProcessor {
 
 #### Хорошо
 
-```java
-public class QueueProcessor {
-    private static final int WAIT_TIMEOUT = 1;
+```kotlin
+class QueueProcessor {
 
-    private Job currentJob;
+    companion object {
+        const val WAIT_TIMEOUT: Int = 1
+    }
 
-    public void run() {
-        while (true) {
-            runNextJob();
-            wait();
+    var currentJob: Job? = null
+
+    public fun run() {
+        CoroutineScope(Dispatchers.Default).launch {
+            while (isActive) {
+                runNextJob()
+                wait()
+            }
         }
     }
 
-    private void runNextJob() {
-        Job job = getNextJob();
+    private suspend fun runNextJob() {
+        val job: Job? = getNextJob()
 
         if (job != null) {
-            runJob(job);
+            runJob(job)
         }
     }
 
-    private void wait() {
-        TimeUnit.SECONDS.sleep(WAIT_TIMEOUT);
+    private suspend fun wait() {
+        delay(WAIT_TIMEOUT)
     }
 
-    private Job getNextJob() {
+    private fun getNextJob(): Job? {
         // Some logic to fetch the next job.
     }
 
-    private void runJob(Job job) {
-        setCurrentJob(job);
-        job.run();
-        clearCurrentJob();
+    private suspend fun runJob(job: Job) {
+        setCurrentJob(job)
+        job.run()
+        clearCurrentJob()
     }
 
-    private void setCurrentJob(Job job) {
-        this.currentJob = job;
+    private fun setCurrentJob(job: Job) {
+        this.currentJob = job
     }
 
-    private void clearCurrentJob() {
-        this.currentJob = null;
+    private fun clearCurrentJob() {
+        this.currentJob = null
     }
 }
 ```
@@ -1152,7 +1228,7 @@ public class QueueProcessor {
 
 - Если код дублируется, то при изменении алгоритма придется менять код в нескольких местах.
 - Есть разные способы избавиться от дублирования кода. У каждого из них есть свои плюсы и минусы.
-- Похожий код не всегда означает дублирование кода (What???).
+- Похожий код не всегда означает дублирование кода.
 
 #### Дублирование в одном классе
 
@@ -1160,28 +1236,29 @@ public class QueueProcessor {
 
 ```kotlin
 class UsersListScreen {
-  fun showClient(client: User, clientView: ClientView) {
-    clientView.firstName.text = client.firstName
-    clientView.lastName.text = client.lastName
 
-    val description =
-      "Email: " + client.email + "\n" +
-      "Address: " + client.address + "\n" + 
-      "Registered at: " + client.registeredAt
+    fun showClient(client: User, clientView: ClientView) {
+        clientView.firstName.text = client.firstName
+        clientView.lastName.text = client.lastName
 
-    clientView.description.text = description
-  }
+        val description =
+            "Email: " + client.email + "\n" +
+            "Address: " + client.address + "\n" + 
+            "Registered at: " + client.registeredAt
 
-  fun showAdmin(admin: User, adminView: AdminView) {
-    adminView.fullName = admin.fullName
+        clientView.description.text = description
+    }
 
-    val description =
-      "Email: " + admin.email + "\n" +
-      "Address: " + admin.address + "\n" + 
-      "Registered at: " + admin.registeredAt
+    fun showAdmin(admin: User, adminView: AdminView) {
+        adminView.fullName = admin.fullName
 
-    adminView.description.text = description
-  }
+        val description =
+            "Email: " + admin.email + "\n" +
+            "Address: " + admin.address + "\n" + 
+            "Registered at: " + admin.registeredAt
+
+        adminView.description.text = description
+    }
 }
 ```
 
@@ -1189,22 +1266,23 @@ class UsersListScreen {
 
 ```kotlin
 class UsersListScreen {
-  fun showClient(client: User, clientView: ClientView) {
-    clientView.firstName.text = client.firstName
-    clientView.lastName.text = client.lastName
-    clientView.description = getDescription(client)
-  }
 
-  fun showAdmin(admin: User, adminView: AdminView) {
-    adminView.fullName = admin.fullName
-    clientView.description = getDescription(admin)
-  }
+    fun showClient(client: User, clientView: ClientView) {
+        clientView.firstName.text = client.firstName
+        clientView.lastName.text = client.lastName
+        clientView.description = getDescription(client)
+    }
 
-  private fun getDescription(user: User): String {
-    return "Email: " + admin.email + "\n" +
-      "Address: " + admin.address + "\n" + 
-      "Registered at: " + admin.registeredAt
-  }
+    fun showAdmin(admin: User, adminView: AdminView) {
+        adminView.fullName = admin.fullName
+        clientView.description = getDescription(admin)
+    }
+
+    private fun getDescription(user: User): String {
+        return "Email: " + admin.email + "\n" +
+            "Address: " + admin.address + "\n" + 
+            "Registered at: " + admin.registeredAt
+    }
 }
 ```
 
@@ -1218,27 +1296,29 @@ class UsersListScreen {
 
 ```kotlin
 class ProfileScreen : BaseUserScreen {
-  fun showProfile(personalInfo: PersonalInfo) {
-    val parts = personalInfo.fullName.split(" ")
 
-    val firstName = parts[0]
-    val lastName = parts[1]
+    fun showProfile(personalInfo: PersonalInfo) {
+        val parts = personalInfo.fullName.split(" ")
 
-    this.firstNameTextView.text = firstName
-    this.lastNameTextView.text = lastName
-  }
+        val firstName = parts[0]
+        val lastName = parts[1]
+
+        this.firstNameTextView.text = firstName
+        this.lastNameTextView.text = lastName
+    }
 }
 
 class UsersListScreen : BaseUserScreen {
-  fun showUser(user: User, userView: UserView) {
-    var parts = user.personalInfo.fullName.split(" ")
 
-    val firstName = parts[0]
-    val lastName = parts[1]
+    fun showUser(user: User, userView: UserView) {
+        var parts = user.personalInfo.fullName.split(" ")
 
-    userView.firstName.text = firstName
-    userView.lastName.text = lastName
-  }
+        val firstName = parts[0]
+        val lastName = parts[1]
+
+        userView.firstName.text = firstName
+        userView.lastName.text = lastName
+    }
 }
 ```
 
@@ -1246,33 +1326,36 @@ class UsersListScreen : BaseUserScreen {
 
 ```kotlin
 class ProfileScreen : BaseUserScreen {
-  fun showProfile(personalInfo: PersonalInfo) {
-    this.firstNameTextView.text = getFirstName(personalInfo)
-    this.lastNameTextView.text = getLastName(personalInfo)
-  }
+
+    fun showProfile(personalInfo: PersonalInfo) {
+        this.firstNameTextView.text = getFirstName(personalInfo)
+        this.lastNameTextView.text = getLastName(personalInfo)
+    }
 }
 
 class UsersListScreen : BaseUserScreen {
-  fun showUser(user: User, userView: UserView) {
-    val personalInfo = user.getPersonalInfo();
 
-    userView.firstName.text = getFirstName(personalInfo)
-    userView.lastName.text = getLastName(personalInfo)
-  }
+    fun showUser(user: User, userView: UserView) {
+        val personalInfo = user.personalInfo
+
+        userView.firstName.text = getFirstName(personalInfo)
+        userView.lastName.text = getLastName(personalInfo)
+    }
 }
 
 open class BaseUserScreen {
-  protected fun getFirstName(PersonalInfo personalInfo): String {
-    return getFullNameParts(personalInfo)[0]
-  }
 
-  protected fun getLastName(PersonalInfo personalInfo): String {
-    return getFullNameParts(personalInfo)[1]
-  }
+    protected fun getFirstName(PersonalInfo personalInfo): String {
+        return getFullNameParts(personalInfo)[0]
+    }
 
-  protected fun getFullNameParts(PersonalInfo personalInfo): List<String> {
-    return personalInfo.fullName.split(" ")
-  }
+    protected fun getLastName(PersonalInfo personalInfo): String {
+        return getFullNameParts(personalInfo)[1]
+    }
+
+    protected fun getFullNameParts(PersonalInfo personalInfo): List<String> {
+        return personalInfo.fullName.split(" ")
+    }
 }
 ```
 
@@ -1285,27 +1368,29 @@ open class BaseUserScreen {
 
 ```kotlin
 class ProfileScreen : BaseObjectScreen {
-  fun showProfile(personalInfo: PersonalInfo) {
-    val parts = personalInfo.fullName.split(" ")
 
-    val firstName = parts[0]
-    val lastName = parts[1]
+    fun showProfile(personalInfo: PersonalInfo) {
+        val parts = personalInfo.fullName.split(" ")
 
-    this.firstNameTextView.text = firstName
-    this.lastNameTextView.text = lastName
-  }
+        val firstName = parts[0]
+        val lastName = parts[1]
+
+        this.firstNameTextView.text = firstName
+        this.lastNameTextView.text = lastName
+    }
 }
 
 class UsersListScreen : BaseListScreen {
-  fun showUser(user: User, userView: UserView) {
-    var parts = user.personalInfo.fullName.split(" ")
 
-    val firstName = parts[0]
-    val lastName = parts[1]
+    fun showUser(user: User, userView: UserView) {
+        var parts = user.personalInfo.fullName.split(" ")
 
-    userView.firstName.text = firstName
-    userView.lastName.text = lastName
-  }
+        val firstName = parts[0]
+        val lastName = parts[1]
+
+        userView.firstName.text = firstName
+        userView.lastName.text = lastName
+    }
 }
 ```
 
@@ -1313,33 +1398,34 @@ class UsersListScreen : BaseListScreen {
 
 ```kotlin
 class ProfileScreen : BaseObjectScreen {
-  fun showProfile(personalInfo: PersonalInfo) {
-    this.firstNameTextView.text = personalInfo.getFirstName()
-    this.lastNameTextView.text = personamInfo.getLastName()
-  }
+
+    fun showProfile(personalInfo: PersonalInfo) {
+        this.firstNameTextView.text = personalInfo.getFirstName()
+        this.lastNameTextView.text = personamInfo.getLastName()
+    }
 }
 
 class UsersListScreen : BaseListScreen {
-  fun showUser(user: User, userView: UserView) {
-    userView.firstName.text = user.personalInfo.getFirstName()
-    userView.lastName.text = user.personalInfo.getLastName()
-  }
+
+    fun showUser(user: User, userView: UserView) {
+        userView.firstName.text = user.personalInfo.getFirstName()
+        userView.lastName.text = user.personalInfo.getLastName()
+    }
 }
 
-class PersonalInfo {
-  // Existing fields, getters and setters
+class PersonalInfo(val fullName: String) {
 
-  fun getFirstName(): String {
-    return this.fullNameParts()[0]
-  }
+    fun getFirstName(): String {
+        return this.fullNameParts()[0]
+    }
 
-  fun getLastname(): String {
-    return this.fullNameParts()[1]
-  }
+    fun getLastname(): String {
+        return this.fullNameParts()[1]
+    }
 
-  private fun getFullNameParts(): List<String> {
-    return this.fullName.split(" ")
-  }
+    private fun getFullNameParts(): List<String> {
+        return this.fullName.split(" ")
+    }
 }
 ```
 
@@ -1348,27 +1434,27 @@ class PersonalInfo {
 #### Тоже хорошо, если нельзя нарушать ответственность
 
 ```kotlin
-class PersonalInfoNamesDecorator(val persinalInfo: PersonalInfo) {
+class PersonalInfoLogic(val persinalInfo: PersonalInfo) {
 
-  fun getFirstName(): String {
-    return this.fullNameParts()[0]
-  }
+    fun getFirstName(): String {
+        return this.fullNameParts()[0]
+    }
 
-  fun getLastName(): String {
-    return this.fullNameParts()[1]
-  }
+    fun getLastName(): String {
+        return this.fullNameParts()[1]
+    }
 
-  private fun getFullNameParts(): List<String> {
-    return this.personalInfo.fullName.split(" ")
-  }
+    private fun getFullNameParts(): List<String> {
+        return this.personalInfo.fullName.split(" ")
+    }
 }
 
 
 val personalInfo = getPersonalInfo()
-val namesDecorator = PersonalInfoNamesDecorator(personalInfo)
+val personalInfoLogic = PersonalInfoLogic(personalInfo)
 
-namesDecorator.getFirstName()
-namesDecorator.getLastName()
+personalInfoLogic.getFirstName()
+personalInfoLogic.getLastName()
 ```
 
 - Избавляйтесь от дублирующегося кода.
@@ -1394,6 +1480,7 @@ class Brand(val id: Integer, val name: String) {}
 - Используйте единый стиль именования для одинаковых вещей.
 - Не делайте много преждевременной оптимизации.
 - Удаляйте неиспользуемый и закомментированный код.
+- Вместо покрытия кода комментариями пытайтесь отраизить свои намерения в коде с помощью продуманного именования, введения промежуточных переменных и функций.
 - Придерживайтесь стиля написания кода вашего языка/фреймворка.
 - Используйте части речи по назначению
   - Используйте глаголы как основу для названий функций.
