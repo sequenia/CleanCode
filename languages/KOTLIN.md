@@ -235,6 +235,17 @@ fun parseProductFromPage(pageTitle: String): Product {
 
     return buildProduct(productTitle, shopName)
 }
+
+// Или
+
+fun parseProductFromPage(pageTitle: String): Product {
+    val titleParts = pageTitle.split("@")
+
+    return buildProduct(
+        productTitle = titleParts[0].split("-")[0].trim(),
+        shopName = titleParts[1]
+    )
+}
 ```
 
 #### Плохо
@@ -785,7 +796,7 @@ fun main() {
 class Product(
     var id: Integer? = null,
     var name: String? = null,
-    var description: String = null,
+    var description: String? = null,
     val price: Integer? = null
 )
 
@@ -796,7 +807,7 @@ class Cart(
 )
 ```
 
-### Создавайте data-классы для группировки полей по контексту
+### Создавайте дополнительные классы для группировки полей по контексту
 
 #### Плохо
 
