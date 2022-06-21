@@ -236,7 +236,7 @@ fun parseProductFromPage(pageTitle: String): Product {
     return buildProduct(productTitle, shopName)
 }
 
-// Или
+// Или воспользоваться именованными аргументами
 
 fun parseProductFromPage(pageTitle: String): Product {
     val titleParts = pageTitle.split("@")
