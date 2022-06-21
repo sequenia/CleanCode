@@ -50,7 +50,7 @@ class DateTimeParser {
     }
 
     private fun getDateTimeFormatter(format: String): DateTimeFormatter {
-        return DateTimeFormatter.ofPattern(ff)
+        return DateTimeFormatter.ofPattern(format)
     }
 }
 ```
