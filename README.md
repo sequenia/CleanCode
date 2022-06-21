@@ -1263,15 +1263,15 @@ class UsersListScreen : BaseUserScreen {
 }
 
 open class BaseUserScreen {
-  protected fun getFirstName(PersonalInfo personalInfo): String {
+  protected fun getFirstName(personalInfo: PersonalInfo): String {
     return getFullNameParts(personalInfo)[0]
   }
 
-  protected fun getLastName(PersonalInfo personalInfo): String {
+  protected fun getLastName(personalInfo: PersonalInfo): String {
     return getFullNameParts(personalInfo)[1]
   }
 
-  protected fun getFullNameParts(PersonalInfo personalInfo): List<String> {
+  protected fun getFullNameParts(personalInfo: PersonalInfo): List<String> {
     return personalInfo.fullName.split(" ")
   }
 }
