@@ -178,12 +178,12 @@ class Storage {
 #### Хорошо
 
 ```kotlin
-const val GRAVITATION_CONSTANT: Float = 9.81f
+const val EARTH_GRAVITY_ACCELERATION: Float = 9.81f
 
 object Calculator {
 
     fun calculatePotentialEnergy(mass: Float, height: Float): Float {
-        return mass * height * GRAVITATION_CONSTANT;
+        return mass * height * EARTH_GRAVITY_ACCELERATION;
     }
 }
 ```

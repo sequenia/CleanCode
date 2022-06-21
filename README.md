@@ -171,10 +171,10 @@ function showItemsInPager(items, onPageChangeListener) {
 ```
 
 ```javascript
-const gravitationConstant = 9.81;
+const earthGravityAcceleration = 9.81;
 
 function potentialEnergy(mass, height) {
-  return mass * height * gravitationConstant;
+  return mass * height * earthGravityAcceleration;
 }
 ```
 
