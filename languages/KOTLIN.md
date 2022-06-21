@@ -1288,9 +1288,9 @@ class UsersListScreen {
     }
 
     private fun getDescription(user: User): String {
-        return "Email: " + admin.email + "\n" +
-            "Address: " + admin.address + "\n" + 
-            "Registered at: " + admin.registeredAt
+        return "Email: " + user.email + "\n" +
+            "Address: " + user.address + "\n" + 
+            "Registered at: " + user.registeredAt
     }
 }
 ```
