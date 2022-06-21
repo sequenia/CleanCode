@@ -601,13 +601,13 @@ runTaskIfNotRunning(task);
 
 ```java
 public Integer getTotalAmount() {
-    if (isArchived()) {
+    if (this.isArchived()) {
         return null;
     } else {
         if (this.cachedTotalAmount != null) {
             return this.cachedTotalAmount;
         } else {
-            if (isEnoughData()) {
+            if (this.isEnoughData()) {
                 return this.calculateTotalAmount();
             } else {
                 return this.getDefaultTotalAmount();
@@ -624,7 +624,7 @@ public Integer getTotalAmount() {
 
 ```java
 public Integer getTotalAmount() {
-    if (isArchived()) {
+    if (this.isArchived()) {
         return null;
     }
 

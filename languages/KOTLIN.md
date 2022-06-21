@@ -648,13 +648,13 @@ fun runTaskIfNotRunning(task: Task) {
 
 ```kotlin
 fun getTotalAmount(): Int? {
-    if (isArchived()) {
+    if (this.isArchived()) {
         return null
     } else {
         if (this.cachedTotalAmount != null) {
             return this.cachedTotalAmount
         } else {
-            if (isEnoughData()) {
+            if (this.isEnoughData()) {
                 return this.calculateTotalAmount()
             } else {
                 return this.getDefaultTotalAmount()
@@ -671,7 +671,7 @@ fun getTotalAmount(): Int? {
 
 ```kotlin
 fun getTotalAmount(): Int? {
-    if (isArchived()) {
+    if (this.isArchived()) {
         return null
     }
 
